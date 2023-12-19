@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myappphp
+  labels:
+    name: myappphp
+spec:
+  containers:
+  - name: myappphp
+    image: viniciuspoa2/app-php
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+    - containerPort: 8080
