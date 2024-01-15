@@ -61,6 +61,8 @@ spec:
     resources:
         limits: # Limitando pod - Oque existe aqui é o limite que o pod consegue receber de recursos
           cpu: "0.5"
+          memory: "128Mi"
         requests: 
           cpu: "0.5" # O requests garante que, no minimo meu pod tera o valor que estou passando aqui
+          memory: "64Mi"
 ```

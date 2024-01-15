@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-qa
+spec:
+  selector:
+    matchLabels:
+      app: nginx-qa
+  template:
+    metadata:
+      labels:
+        app: nginx-qa
+    spec:
+      containers:
+      - name: nginx-qa-container
+        image: nginx:1.16.0
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80

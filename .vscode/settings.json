@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "https://json.schemastore.org/yamllint.json": "file:///c%3A/Users/vinicius.pereira/Documents/Development/kubernetes-playground/deployment.yaml"
+    }
+}
