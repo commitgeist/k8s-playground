@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: duplicaquantidade
+spec:
+  # modifique o número de replicas de acordo com o seu caso
+  replicas: 3
+  selector:
+    matchLabels:
+      opa: bondedok8s
+      app: manotumanjadek8s

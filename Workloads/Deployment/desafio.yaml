@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx-girus
+    opa: sesasional-juvenal
+spec:
+  replicas: 5
+  strategy:
+    type: Recrate
+  selector:
+    matchLabels:
+      app: nginx-girus
+  template:
+    metadata:
+      labels:
+        app: nginx-girus
+    spec:
+      containers:
+      - name: nginx-girus
+        image: nginx:1.16.0
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "0.5"
+          limits:
+            memory: "128Mi"
+            cpu: "0.7"

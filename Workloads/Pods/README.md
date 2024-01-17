@@ -66,3 +66,38 @@ spec:
           cpu: "0.5" # O requests garante que, no minimo meu pod tera o valor que estou passando aqui
           memory: "64Mi"
 ```
+
+
+### Configurando volume empty-dir
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-volume
+  labels:
+    name: nginx-volume
+spec:
+  containers:
+  - name: nginx-volume
+    image: nginx
+    volumeMounts:
+    - mountPath: /nginxvolume
+      name: primeiro-emptydir
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+      requests:
+        cpu: "0.5"
+        memory: "65Mi"
+    dbsPolicy: ClusterFirst
+    restartPolicy: Always
+    volumes:
+    - name: primeiro-emptydir
+      emptyDir:
+        sizeLimit: "256Mi"
+    ports:
+    - containerPort: 80
+
+```
