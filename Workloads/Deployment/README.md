@@ -1,4 +1,4 @@
-Referencia geral: https://kubernetes.io/pt-br/
+Referencia geral: https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/
 
 **Definição do Deployment**: O que é um Deployment?
 No Kubernetes um Deployment é um objeto que representa uma aplicação. Ele é responsável por gerenciar os Pods que compõem uma aplicação. Um Deployment é uma abstração que nos permite atualizar os Pods e também fazer o rollback para uma versão anterior caso algo dê errado.

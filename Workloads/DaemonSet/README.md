@@ -57,3 +57,105 @@ spec:
 
 
 ```
+
+
+Eu deixei o arquivo comentado para facilitar o entendimento, agora vamos criar o DaemonSet utilizando o arquivo de manifesto.
+
+```bash
+kubectl apply -f node-exporter-daemonset.yaml
+```
+ 
+
+Agora vamos verificar se o DaemonSet foi criado.
+
+ ```bash
+kubectl get daemonset
+ ```
+
+Como podemos ver, o DaemonSet foi criado com sucesso.
+
+NAME            DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+node-exporter   2         2         2       2            2           <none>          5m24s
+ 
+
+Caso você queira verificar os Pods que o DaemonSet está gerenciando, basta executar o comando abaixo.
+
+```bash
+kubectl get pods -l app=node-exporter
+```
+ 
+
+Somente para lembrar, estamos utilizando o parâmetro -l para filtrar os Pods que possuem a label app=node-exporter, que é o caso do nosso DaemonSet.
+
+Como podemos ver, o DaemonSet está gerenciando 2 Pods, um em cada nó do cluster.
+
+NAME                  READY   STATUS    RESTARTS   AGE
+node-exporter-k8wp9   1/1     Running   0          6m14s
+node-exporter-q8zvw   1/1     Running   0          6m14s
+ 
+
+Os nossos Pods do node-exporter foram criados com sucesso, agora vamos verificar se eles estão sendo executados em todos os nós do cluster.
+
+```bash
+kubectl get pods -o wide -l app=node-exporter
+```
+ 
+
+Com o comando acima, podemos ver em qual nó cada Pod está sendo executado.
+
+NAME                                READY   STATUS    RESTARTS   AGE     IP               NODE                            NOMINATED NODE   READINESS GATES
+node-exporter-k8wp9                 1/1     Running   0          3m49s   192.168.8.145    ip-192-168-8-145.ec2.internal   <none>           <none>
+node-exporter-q8zvw                 1/1     Running   0          3m49s   192.168.55.68    ip-192-168-55-68.ec2.internal   <none>           <none>
+ 
+
+Como podemos ver, os Pods do node-exporter estão sendo executados em todos os dois nós do cluster.
+
+Para ver os detalhes do DaemonSet, basta executar o comando abaixo.
+
+```bash
+kubectl describe daemonset node-exporter
+```
+ 
+
+O comando acima vai retornar uma saída parecida com a abaixo.
+
+Name:           node-exporter
+Selector:       app=node-exporter
+Node-Selector:  <none>
+Labels:         <none>
+Annotations:    deprecated.daemonset.template.generation: 1
+Desired Number of Nodes Scheduled: 2
+Current Number of Nodes Scheduled: 2
+Number of Nodes Scheduled with Up-to-date Pods: 2
+Number of Nodes Scheduled with Available Pods: 2
+Number of Nodes Misscheduled: 0
+Pods Status:  2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=node-exporter
+  Containers:
+   node-exporter:
+    Image:        prom/node-exporter:latest
+    Port:         9100/TCP
+    Host Port:    9100/TCP
+    Environment:  <none>
+    Mounts:
+      /host/proc from proc (ro)
+      /host/sys from sys (ro)
+  Volumes:
+   proc:
+    Type:          HostPath (bare host directory volume)
+    Path:          /proc
+    HostPathType:  
+   sys:
+    Type:          HostPath (bare host directory volume)
+    Path:          /sys
+    HostPathType:  
+Events:
+  Type    Reason            Age   From                  Message
+  ----    ------            ----  ----                  -------
+  Normal  SuccessfulCreate  9m6s  daemonset-controller  Created pod: node-exporter-q8zvw
+  Normal  SuccessfulCreate  9m6s  daemonset-controller  Created pod: node-exporter-k8wp9
+ 
+
+Na saída acima, podemos ver algumas informações bem importantes relacionadas ao DaemonSet, como por exemplo, o número de nós que o DaemonSet está gerenciando, o número de Pods que estão sendo executados em cada nó, etc.
+

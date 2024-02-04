@@ -5,9 +5,7 @@ metadata:
 spec:
   containers:
   - name: podrhama
-    image: rhamanalysis/rhama-hidro-authenticator-app:production-9915
-    command: ["sleep"]
-    args: ["3600"] # Mantém o container em execução por uma hora
+    image: rhamanalysis/rhama-hidro-authenticator-app:production-10096
     resources:
       limits:
         memory: "300Mi"
