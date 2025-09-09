@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-fileshare
+  labels:
+    name: pod-fileshare
+spec:
+  containers:
+  - name: pod-fileshare
+    image: nginx
+    volumeMounts:
+      - mountPath: /mnt/azure
+        name: azure
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80
+  volumes:
+    - name: azure
+      csi:
+        driver: file.csi.azure.com
+        readOnly: false
+        volumeAttributes:
+          secretName: azure-secret
+          shareName: aksshare

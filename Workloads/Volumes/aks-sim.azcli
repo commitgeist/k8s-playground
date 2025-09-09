@@ -1,0 +1,29 @@
+# Login no Azure
+az login
+
+# Obter Credenciais 
+az aks get-credentials --resource-group rg-aks-sim --name aks-sim
+
+# Criar Secret no AKS Cluster
+kubectl create secret generic azure-secret --from-literal=azurestorageaccountname=storageaks2023 --from-literal=azurestorageaccountkey=<KEY TOKEN>
+
+# Listando os Segredos
+kubectl get secrets
+
+# Criar POD
+kubectl apply -f pod-fileshare.yaml
+
+# Listando os Pods
+kubectl get pods
+
+# Listando os containers
+kubectl get pods -o jsonpath="{.items[*].spec.containers[*].name}"
+
+# Descrevendo o POD
+kubectl describe pod pod-fileshare
+
+# Listando Arquivos do FileShare de dentro do container
+kubectl exec pod-fileshare --container pod-fileshare -- sh -c "ls /mnt/azure"
+
+# Criar Arquivo no Container usando Volume CSI
+kubectl exec pod-fileshare --container pod-fileshare -- sh -c "echo \"Criado no Container\" > /mnt/azure/arq-container.txt"

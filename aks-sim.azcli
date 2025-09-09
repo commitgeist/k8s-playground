@@ -1,0 +1,43 @@
+# Criando o resource group
+az group create \
+  --name rg-aks-sim \
+  --location eastus
+
+
+# Criando o aks
+az aks create \
+  --resource-group rg-aks-sim \
+  --name aks-sim \
+  --node-count 2 \
+  --node-vm-size Standard_B2s \
+  --generate-ssh-keys
+
+# (pode ajustar --node-vm-size e --node-count conforme necessidade)
+
+
+# Criando o acr
+az acr create \
+  --resource-group rg-aks-sim \
+  --name acrforakssim$RANDOM \
+  --sku Basic
+
+# Vinculando/Attachando o acr ao aks
+az aks update \
+  --resource-group rg-aks-sim \
+  --name aks-sim \
+  --attach-acr acr-for-aks-sim
+
+
+# Criando uma storage account
+az storage account create \
+  --name stasim$RAMDON \
+  --resource-group rg-aks-sim \
+  --location eastus \
+  --sku Standard_LRS \
+  --kind StorageV2
+
+
+# Login
+az login
+
+az aks get-credentials --resource-group rg-aks-sim --name sta-sim

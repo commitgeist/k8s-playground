@@ -1,0 +1,28 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: managed-premium
+provisioner: kubernetes.io/azure-disk
+parameters:
+  skuName: Premium_LRS     # Tipo do disco (Premium SSD, Local Redundant Storage)
+  kind: Managed            # Se é disco gerenciado pelo Azure
+reclaimPolicy: Delete      # O que fazer com o disco quando o PVC for deletado (Delete ou Retain)
+volumeBindingMode: Immediate
+
+## Explicação:
+
+# provisioner → quem vai criar o volume (no AKS, kubernetes.io/azure-disk ou kubernetes.io/azure-file).
+
+# skuName → tipo de disco no Azure (Standard_LRS, Premium_LRS, StandardSSD_LRS, etc.).
+
+# reclaimPolicy:
+
+# Delete → apaga o disco junto com o PVC.
+
+# Retain → mantém o disco no Azure mesmo que o PVC seja apagado.
+
+# volumeBindingMode:
+
+# Immediate → provisiona assim que o PVC é criado.
+
+# WaitForFirstConsumer → só provisiona quando um Pod realmente usar o PVC.

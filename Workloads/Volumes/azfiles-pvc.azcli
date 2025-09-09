@@ -1,0 +1,71 @@
+# Login no Azure
+az login
+
+# Variaveis
+storage=stasim
+rg=rg-aks-sim
+local=eastus
+fileshare=aksshare
+aks=aks-storage
+sku=Standard_B2s
+
+# Criar Grupo de Recursos
+az group create -n $rg -l $local
+
+# Criar Storage Account
+az storage account create -n $storage -g $rg -l $local --sku Standard_LRS
+
+# Obter Connection String do Storage Account
+connstring=$(az storage account show-connection-string -n $storage -g $rg -o tsv)
+
+# Criar File Share
+az storage share create -n $fileshare --connection-string $connstring
+
+# Obter Chave do Storage Account
+key=$(az storage account keys list -g $rg --account-name $storage --query "[0].value" -o tsv)
+
+# Criar AKS
+az aks create -n $aks -g $rg --node-count 1 --node-vm-size $sku
+
+# Obter Credenciais
+az aks get-credentials -n $aks -g $rg
+
+# Criar Segredo com Key do Storage Account
+kubectl create secret generic azure-secret --from-literal=azurestorageaccountname=$storage --from-literal=azurestorageaccountkey=$key
+
+# Listar Secrets
+kubectl get secrets
+
+# listar Storage Classes
+kubectl get storageclass
+
+# Criar Storage Class
+kubectl apply -f sc-fileshare.yaml
+
+# Listar PV
+kubectl get persistentvolume
+
+# Criar PV
+kubectl apply -f pv-fileshare.yaml
+
+# Criar PVC
+kubectl apply -f pvc-fileshare.yaml
+
+# Listar PVCs
+kubectl get pvc
+
+# Criar POD Consumindo File Share ja existente
+kubectl get pods
+kubectl apply -f pod-fileshare.yaml
+
+# Pegar nome do Container
+kubectl get pods -o jsonpath="{.items[*].spec.containers[*].name}"
+
+# Listar Arquivos no File Share
+kubectl exec pod-pvc --container pod-pvc -- sh -c "ls /mnt/azure"
+
+# Criar Arquivo via Container
+kubectl exec pod-pvc --container pod-pvc -- sh -c "echo \"Criado no Container\" > /mnt/azure/arq-container.txt"
+
+# Excluir Grupo de Recursos
+az group delete -n $rg 
