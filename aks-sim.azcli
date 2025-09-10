@@ -28,6 +28,9 @@ az aks update \
   --attach-acr acr-for-aks-sim
 
 
+az keyvault create --name keyvault-for-aks --resource-group rg-aks-sim --location eastus --enable-rbac-authorization
+
+
 # Criando uma storage account
 az storage account create \
   --name stasim$RAMDON \
@@ -41,3 +44,7 @@ az storage account create \
 az login
 
 az aks get-credentials --resource-group rg-aks-sim --name sta-sim
+
+az aks get-credentials \
+  --resource-group rg-aks-sim \
+  --name aks-sim

@@ -1,0 +1,5 @@
+# Exclusão
+az aks delete \
+  --name <NOME_DO_AKS> \
+  --resource-group <RESOURCE_GROUP> \
+  --yes --no-wait

@@ -1,0 +1,51 @@
+# 1. Criar RG
+az group create -n rg-aks-sim -l eastus
+
+# 2. Criar VNet/Subnet no mesmo RG
+    az network vnet create \
+    -g rg-aks-sim \
+    -n aks-vnet \
+    --address-prefixes 10.0.0.0/8 \
+    --subnet-name aks-subnet \
+    --subnet-prefixes 10.240.0.0/16
+
+# 3. Criar AKS apontando para essa subnet
+    az aks create \
+    -g rg-aks-sim \
+    -n aks-sim \
+    --node-count 1 \
+    --node-vm-size Standard_B2s \
+    --vnet-subnet-id $(az network vnet subnet show -g rg-aks-sim -n aks-subnet --vnet-name aks-vnet --query id -o tsv)
+
+
+# Exclusão de todo RG
+
+    az group delete -n rg-aks-sim --yes --no-wait
+
+    --yes → pula a confirmação interativa
+
+    --no-wait → não bloqueia o terminal; a exclusão roda em background
+
+# Caso queira excluir só os recursos individuais (sem apagar o RG)
+
+    # Excluir o cluster AKS
+    az aks delete -g rg-aks-sim -n aks-sim --yes --no-wait
+
+    # Excluir a VNet (a subnet é apagada junto)
+    az network vnet delete -g rg-aks-sim -n aks-vnet
+
+
+# Criar no AKV os valores
+
+az keyvault secret set --vault-name akvsimsecrets --name DB-USER --value 'fakedbuser'
+az keyvault secret set --vault-name akvsimsecrets --name DB-PASSWORD --value 'Sup3rS3cret!'
+az keyvault secret set --vault-name akvsimsecrets --name REDIS-PASSWORD --value 'R3disP@ssw0rd'
+az keyvault secret set --vault-name akvsimsecrets --name API-KEY --value 'apikey-1234567890'
+az keyvault secret set --vault-name akvsimsecrets --name API-SECRET --value 'secretapikey-0987654321'
+az keyvault secret set --vault-name akvsimsecrets --name SMTP-USER --value 'mailer@fakecorp.com'
+az keyvault secret set --vault-name akvsimsecrets --name SMTP-PASSWORD --value 'M41lP@ss'
+az keyvault secret set --vault-name akvsimsecrets --name JWT-SECRET --value 'jwt_super_secret_key'
+az keyvault secret set --vault-name akvsimsecrets --name SSH-PRIVATE-KEY --value '-----BEGIN PRIVATE KEY-----FAKE-----END PRIVATE KEY-----'
+az keyvault secret set --vault-name akvsimsecrets --name PAYMENT-GATEWAY-KEY --value 'pg_test_123456789'
+az keyvault secret set --vault-name akvsimsecrets --name OAUTH-CLIENT-ID --value 'clientid-12345'
+az keyvault secret set --vault-name akvsimsecrets --name OAUTH-CLIENT-SECRET --value 'clientsecret-67890'
