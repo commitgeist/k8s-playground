@@ -1,0 +1,36 @@
+# Login no AKS
+az login
+
+# Obter credenciais
+az aks get-credentails -g rg-aks-sim -n aks-sim-rback
+
+# Mostrar detalhes do nosso aks
+az aks show -g aks-sim -n aks-sim-rbac -o yaml
+
+
+# Listar aks e o status do aks
+az aks list --query "[].{None:name, RBAC:enableRbac}" -o table
+
+# Parametros
+ns=homologacao
+
+# Criar namespace
+kubectl create namespace $ns
+
+# Listar namespaces
+kubectl get namespaces
+
+# Criar service account - Sys Admin
+kubectl apply -f ServiceAccount/sysadmin.yaml
+
+# Listar service accounts
+kubectl get serviceaccounts -n $ns
+
+# Detalhar service account sysadmin
+kubectl get serviceaccount sysadmin -n $ns -o yaml
+
+# Segredo criado para o sysadmin
+kubectl get secret sysadmin-token-7jfwt
+
+# Verificar se o usuário SysAdmin tem permissão de acesso aos pods no namespace homologação
+kubectl auth can-i list pods --as=system:serviceaccount:homologacao:sysadmin
