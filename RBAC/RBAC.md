@@ -1,6 +1,6 @@
 # RBAC no AKS (Azure Kubernetes Service)
 
-## O que é RBAC?
+## 🔹 O que é RBAC?
 RBAC (Role-Based Access Control) é o **Controle de Acesso Baseado em Funções**.  
 Em vez de dar permissões diretamente para pessoas ou serviços, criamos **funções (roles)** com permissões definidas e ligamos usuários, grupos ou identidades a essas funções.
 
@@ -14,7 +14,7 @@ Se o médico sair e outro entrar, não mudamos as permissões — só trocamos q
 
 ---
 
-## RBAC dentro do AKS
+## 🔹 RBAC dentro do AKS
 
 ### 1. Autenticação (Authentication) → Quem é você?
 - O Kubernetes **não guarda usuário e senha**.  
@@ -58,7 +58,7 @@ Assim, quando alguém entra na empresa:
 
 ---
 
-## Exemplo de Configuração
+## 🔹 Exemplo de Configuração
 
 👉 **Role** (ler pods no namespace `dev`):
 ```yaml
@@ -99,7 +99,71 @@ Mas não consegue criar ou deletar pods.
 
 ---
 
-## Fluxo Resumido (AKS + RBAC)
+## 🔹 apiGroups explicados
+
+No RBAC (`Role` / `ClusterRole`), cada regra (`rules`) precisa indicar **de qual grupo de API** os recursos fazem parte.
+
+### 1. `apiGroups: [""]` (core group)
+- Grupo vazio (`""`) é o **core group** do Kubernetes.  
+- Recursos básicos:  
+  - `pods`, `services`, `configmaps`, `secrets`, `namespaces`  
+- Exemplo:
+  ```yaml
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  ```
+
+---
+
+### 2. `apiGroups: ["rbac.authorization.k8s.io"]` (grupo de RBAC)
+- Grupo que cuida da **autorização e segurança**.  
+- Recursos:  
+  - `roles`, `rolebindings`, `clusterroles`, `clusterrolebindings`  
+- Exemplo:
+  ```yaml
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "clusterroles"]
+    verbs: ["get", "create"]
+  ```
+
+---
+
+### 3. `apiGroups: ["apps"]` (grupo de aplicações)
+- Grupo responsável por workloads.  
+- Recursos:  
+  - `deployments`, `statefulsets`, `daemonsets`, `replicasets`  
+- Exemplo:
+  ```yaml
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  ```
+
+---
+
+### 🔹 Exemplo com múltiplos grupos
+```yaml
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["clusterroles", "clusterrolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
+```
+
+👉 Aqui temos 3 blocos porque cada conjunto de recursos pertence a **grupos de API diferentes**.  
+Não dá para misturar todos em um bloco só.
+
+---
+
+## 🔹 Fluxo Resumido (AKS + RBAC)
 
 1. **Você se autentica** no Azure AD → recebe um token.  
 2. **Cluster valida o token** → confirma quem você é.  
@@ -108,9 +172,10 @@ Mas não consegue criar ou deletar pods.
 
 ---
 
-## Boas práticas de administração
+## 🔹 Boas práticas de administração
 - Sempre use **grupos do Azure AD**, não usuários individuais.  
 - Defina **níveis de acesso claros**:  
   - Dev → apenas no namespace da squad.  
   - Ops/SRE → permissões mais amplas.  
   - Admin → acesso total, mas com MFA obrigatório.  
+- Centralize a gestão no **Azure AD**, não direto no cluster.  

@@ -1,0 +1,41 @@
+# 1. Criar RG
+az group create -n rg-aks-sim -l eastus
+
+# 2. Criar VNet/Subnet no mesmo RG
+az network vnet create \
+    -g rg-aks-sim \
+    -n aks-vnet \
+    --address-prefixes 10.0.0.0/8 \
+    --subnet-name aks-subnet \
+    --subnet-prefixes 10.240.0.0/16
+
+# 3. Criar AKS apontando para essa subnet
+az aks create \
+    -g rg-aks-sim \
+    -n aks-sim \
+    --node-count 1 \
+    --node-vm-size Standard_B2s \
+    --enable-aad --disable-local-accounts \
+    --vnet-subnet-id $(az network vnet subnet show -g rg-aks-sim -n aks-subnet --vnet-name aks-vnet --query id -o tsv)
+
+
+# Exclusão de todo RG
+az group delete -n rg-aks-sim --yes --no-wait
+    --yes → pula a confirmação interativa
+
+    --no-wait → não bloqueia o terminal; a exclusão roda em background
+
+# Caso queira excluir só os recursos individuais (sem apagar o RG)
+
+# Excluir o cluster AKS
+az aks delete -g rg-aks-sim -n aks-sim --yes --no-wait
+
+# Excluir a VNet (a subnet é apagada junto)
+az network vnet delete -g rg-aks-sim -n aks-vnet
+
+
+# Status do Azure RBAC
+azz aks show -g $rg -n $aks --query {AzureRBAC:addProfile} -o yaml
+
+# Ativar Azure RBAC
+az aks update -g $rg -n $aks --enable-azure-rbac

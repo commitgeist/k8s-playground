@@ -1,0 +1,61 @@
+# Login no azure
+az login
+
+# Parametros
+rg=rg-managedidentity
+app=appmanagedidentity
+local=eastus
+aks=aks-storage
+sku=Standard_B2s
+rgid-rg-identity
+
+# Criar grupo de recursos do AKS
+az group create -n $rg -l $local
+
+# Criar o grupo de recursos do Managed Identity
+az group create -n $rgid -l $local
+
+# Listar managed identity
+az identity list -o table
+
+# Listar operações disponiveis
+az identity list-operations -o table
+
+# Criar identidade gerenciada
+az identity create -n $identity -g $rgid -l $local
+
+# Listar identidade gerenciada
+az identity list --query "[].{Nome:name, Id:id, Localizacao:location}"
+
+# Obter ID da nossa subscription
+subscriptionId=$(az account show --query id -o tsv)
+
+# Obter o ID da Managed Identity
+
+identityId=/subscriptions/subscriptionId/resourceGroups/$rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$identity
+
+# VNET
+vnet=vnet-msi
+snet=snet-msi
+
+# Criar VNET e Subnet
+az network vnet create -g $rg -n $vnet ---address-prefix 10.0.0.0/16 --subnet-name $snet --subnet-prefix 10.0.0.0/24
+
+# Obter ID da subnet
+az network vnet subnet show -g $rg -n $snet --net-name $vnet --query id -o tsv
+
+# Criar AKS com VNET 
+az aks create -g $rg -n $aks \
+    --network-plugin azure \
+    --vnet-subnet-id $snetid \
+    --docker-bridge-address 172.17.0.1./16 \
+    --dns-service-ip 10.2.0.10 \
+    --service-cider 10.2.0.0./24 \
+    --enable-managed-identity \
+    --assign-identity $identityid
+
+# Verificar se o Cluster está configurado como Managed Identity (MSI)
+az aks show -g $rg -n $aks --query "servicePrincipalProfile"
+
+# ID do MSI Atribuido no AKS
+az aks show -g $rg -n $aks --query "identity"

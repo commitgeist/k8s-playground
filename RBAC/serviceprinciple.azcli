@@ -1,0 +1,54 @@
+# Referencia
+# Acesse: https://learn.microsoft.com/en-us/cli/azure/ad/app/permission?view=azure-cli-latest#az_ad_app_permission_admin_consent
+
+# Login no azure
+az login
+
+# Parametros
+rg=serviceprincipal
+app=appAksServicePrincipal
+local=eastus
+aks=aks-servicePrincipal
+sku=Standard_B2s
+
+# Criar grupo de recursos do AKS
+az group create -n $rg -l $local
+
+# LIstar App Registrations (App Service)
+az ad app list
+
+# Criar Service Principal
+az ad sp create-for-rbac --name $app
+
+# Resetar a senha
+az ad sp credential reset --name $app
+
+appId=<id gerado>
+secret=<secret gerado>
+
+# Criar aks com o Service Principal
+az aks create -g $rg -n $aks --service-principal $appId --client-secret $secret --node-count 1 --node-vm-size $sku
+
+# Verificar se o AKS está configurado com o Service Principal
+az aks show -g $rg -n $aks --query "ServicePrincipalProfile"
+
+# ID do objeto da identitidade atribuida ao AKS
+az aks show -g $rg -n $aks --query "identity"
+
+# Listar todas as Roles
+az role assigment list --assignee $appId --all -o table
+
+# Obter ID da Subscription
+subscriptionId=$(az account show --query id -o tsv)
+
+# Se estiver usando Bash no windows
+export MSYS_NO_PATCHCONV=1
+
+# Criar role vinculado como Contribuidor para o Resource Group do AKS
+az role assigment create --assignee $appId --role "contributor" --scope "/subscriptions/$subscriptionId/resourceGroups/$rg"
+
+# Exlcluir o Cluster AKS
+az aks delete -g $rg -n $aks -y --no-wait
+
+# Excluir Service Principle e role aassigment
+az ad sp delete --id $appId
