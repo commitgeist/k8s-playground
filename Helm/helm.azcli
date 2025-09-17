@@ -1,0 +1,100 @@
+# Login no Azure
+az login
+
+# Parametros
+rg=rg-helm
+local=eastus2
+aks=aks-helm
+sku=Standard_B2s
+
+# Criar Grupo de Recursos
+az group create -n $rg -l $local
+
+# Criar AKS
+az aks create -g $rg -n $aks --node-count 1 --node-vm-size $sku
+
+# Obter Credenciais
+az aks get-credentials -g $rg -n $aks
+
+# Verificar a versao do Helm
+helm version
+
+# Listar Reposuitorios
+helm repo list
+
+# Adicionar Repositorio do Bitnami
+helm repo add bitnani https://charts.bitnami.com/bitnami
+
+# Localizar Charts no Repositorio Helm
+helm search repo bitnani
+
+# Atualizar a Lista de Repos
+helm repo update
+
+# Remover Repositorio do Helm
+helm repo remove bitnani
+
+
+# Criar Namespace
+kubectl create ns helm
+
+# Instalar Release no Namespace Helm
+helm install wp-treinamento-helm bitnani/wordpress -n helm
+
+# Recuperar Segredo
+kubectl get secret --namespace helm wp-treinamento-helm-wordpress -o jsonpath="{.data.wordpress-password}" | base64 -d
+w1SidiSkH6
+
+# Listar Services
+kubectl get svc -n helm
+
+# Listar Deployment
+kubectl get deploy -n helm
+
+# Listar Pods
+kubectl get pods -n helm
+
+# Acessar URL
+curl http://20.96.61.150
+
+# Listar Releases
+helm list -n helm
+
+# Desinstalar Release
+helm uninstall wp-treinamento-helm -n helm
+
+# remover Repositorio
+helm repo remove bitnani
+
+# Remover Namespace
+kubectl delete ns helm
+kubectl get ns
+
+
+
+# Criar Chart Helm
+helm create site
+
+# Criar Namespace
+kubectl create ns site
+
+# Instalar Chart Site
+helm install site-chart site/ --values site/values.yaml -n site
+
+# Listar Release
+helm list -n site
+
+# Listar Services
+kubectl get svc -n site
+
+# Listar Pods
+kubectl get pods -n site
+
+# Listar Deployment 
+kubectl get deploy -n site
+
+# Acessar URL Externa do Service
+curl http://20.80.193.189
+
+# Deletar Grupo de Recursos
+az group delete -n $rg -y
