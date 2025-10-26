@@ -1,0 +1,62 @@
+# Login no azure
+az login
+
+# Parametros
+aks=aks-cni
+sku=Standard_B2s
+rg=networking-cni
+local=eastus
+vnet=aks-network-cni
+snet=snet-aks-cni
+app=cni-app
+
+# Criando RG
+az group create -n $rg -l $local
+
+
+# Criando VNET e Subnet
+az network vnet create \
+    -g $rg \
+    -n $vnet \
+    --address-prefixes 192.168.0.0/16 \
+    --subnet-name $snet \
+    --subnet-prefixes 192.168.1.0/24
+
+# Listar VNET
+az networking vnet list -g $rg -o table
+
+# Obter VNET ID
+vnetID=$(az network vnet show -g $rg -n $vnet --query id -o tsv)
+
+# Obter Subnet ID
+snetID=$(az network vnet subnet show -g $rg -n $snet --vnet-name $vnet --query id -o tsv)
+
+# Se estiver usando Bash no Windows
+export MYSQL_NO_PATH=1
+
+# Criar Role para AKS e VNET
+az ad sp create-for-rbac -n $app
+
+appId=<appId gerado>
+secret=<secret gerado>
+
+# Listar App Registrations
+az ad app list --query "[].{Name:displayName, Id:appId}" -o table
+
+# Atribuir permissão a VNET como NetWork Contributor
+az role assignment create --assignee $appId --role "Network Contributor" --scope $vnetId
+
+
+# Provisionar AKS com Azure CNI
+az aks create -g $rg --node-count 1 --node-vm-size $sku \
+    --network-plugin azure \
+    --vnet-subnet-id $snetId \
+    --docker-bridge-address 172.17.0.1/16 \
+    --dns-service-ip 10.1.0.10 \
+    --service-cidr 10.1.0.0/16 \
+    --service-principal $appId \
+    --client-secret $secret \
+    -n $aks
+
+# Verificar o plugin de network do Cluster AKS
+az aks show -g $rg -n $aks --query {NetWorkPlugin: networkProfile.networkPlugin} -o table

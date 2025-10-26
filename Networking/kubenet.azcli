@@ -1,0 +1,69 @@
+# Parametros
+aks=aks-kubenet
+sku=Standard_B2s
+rg=kubenet-networking
+local=eastus
+vnet=aks-kubenet
+snet=snet-aks-kubenet
+app=kubenet-app
+
+# Criar RG
+az group create -n $rg -l $local
+
+# Criar VNet/Subnet no mesmo RG
+az network vnet create \
+    -g $rg \
+    -n $vnet \
+    --address-prefixes 192.168.0.0/16 \
+    --subnet-name $snet \
+    --subnet-prefixes 192.168.1.0/24
+
+# Listar VNETs
+az network vnet list -o table
+
+# Obter VNET ID
+vnetId=$(az network vnet show -g $rg -n $vnet --query id -o tsv)
+
+# Obter Subnet ID
+snetId=$(az network vnet subnet show -g $rg -n $snet --vnet-name $vnet --query id -o tsv)
+
+# Se tover isadmp Bash no Windows
+export MYSQL_NO_PATH=1
+
+# Criar Role para AKS e VNET
+az ad sp create-for-rbac -n $app
+
+
+appId=<appId gerado>
+secret=<secret gerado>
+
+# Listar App Registrations
+
+az ad app list --query "[].{Name:displayName, Id:appId}" -o table
+
+
+# Atribuir permissão a VNET como NetWork Contributor
+az role assignment create --assignee $appId --role "Network Contributor" --scope $vnetId
+
+# Atualizar AKS com a Role
+az aks update \
+    -g $rg \
+    -n $aks \
+    --service-principal $appId \
+    --client-secret $secret
+
+
+# Criar AKS apontando para essa subnet
+az aks create \
+    -g $rg \
+    -n $aks \
+    --node-count 1 \
+    --node-vm-size $sku \
+    --vnet-subnet-id $snetId \
+    --network-plugin kubenet
+    --pode-cidr 10.244.0.0/16 \
+    --service-cidr 10.0.0.0/16 \
+    --dns-service-ip 10.0.0.10 \
+    --docker-bridge-address 172.17.0.1/16
+    --service-principal $appId \
+    --client-secret $secret
