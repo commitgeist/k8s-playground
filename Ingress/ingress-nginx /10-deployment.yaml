@@ -30,15 +30,15 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
         - /nginx-ingress-controller
-        - --election-id=ingress-nginx-v2-leader
-        - --controller-class=k8s.io/ingress-nginx-v2
-        - --ingress-class=nginx-v2
-        - --configmap=$(POD_NAMESPACE)/ingress-nginx-v2-controller
+        - --election-id=ingress-nginx-leader
+        - --controller-class=k8s.io/ingress-nginx
+        - --ingress-class=nginx
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx-controller
         - --validating-webhook=:8443
         - --validating-webhook-certificate=/usr/local/certificates/cert
         - --validating-webhook-key=/usr/local/certificates/key
         - --watch-ingress-without-class=false
-        - --publish-service=ingress-nginx-v2/ingress-nginx-v2-controller
+        - --publish-service=ingress-nginx-v2/ingress-nginx-controller
         env:
         - name: POD_NAME
           valueFrom:
