@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/component: controller
+data:
+  allow-snippet-annotations: "true"
+  use-forwarded-headers: "true"
+  compute-full-forwarded-for: "true"
+  use-proxy-protocol: "false"
+
