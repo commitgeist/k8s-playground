@@ -1,0 +1,57 @@
+# Caso de Uso: DNS Wildcard para Desenvolvimento
+# 
+# Cenário: Criar DNS wildcard para ambientes de desenvolvimento/staging
+# - *.dev.local → 192.168.1.100
+# - *.staging.local → LoadBalancer do Ingress
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-wildcard
+  namespace: kube-system
+data:
+  Corefile: |
+    # Domínio de desenvolvimento - Wildcard
+    dev.local:53 {
+        errors
+        template IN A dev.local {
+            answer "{{ .Name }} 60 IN A 192.168.1.100"
+        }
+        cache 30
+        log
+    }
+    
+    # Domínio de staging - Aponta para Ingress
+    staging.local:53 {
+        errors
+        template IN A staging.local {
+            answer "{{ .Name }} 60 IN A 10.96.100.50"
+        }
+        cache 30
+    }
+    
+    # Configuração padrão
+    .:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        ready
+        
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        
+        prometheus :9153
+        
+        forward . /etc/resolv.conf {
+            max_concurrent 1000
+        }
+        
+        cache 30
+        loop
+        reload
+        loadbalance
+    }

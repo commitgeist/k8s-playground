@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: site-nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: site-nginx
+  template:
+    metadata:
+      labels:
+        app: site-nginx
+    spec:
+      containers:
+      - name: site-nginx
+        image: higorluisbarbosa/site-treinamentos:v3
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80

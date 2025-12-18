@@ -1,0 +1,44 @@
+# Caso de Uso: Reescrita de DNS (DNS Rewrite)
+# 
+# Cenário: Redirecionar ou reescrever queries DNS
+# - Redirecionar *.prod.local para *.production.svc.cluster.local
+# - Criar aliases para serviços
+# - Migração gradual de nomes de serviços
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-rewrite
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        ready
+        
+        # Regras de reescrita
+        rewrite name db.local mysql.database.svc.cluster.local
+        rewrite name regex (.*)\.prod\.local {1}.production.svc.cluster.local
+        rewrite name regex old-api\.(.*) new-api.{1}
+        rewrite name api api-gateway.default.svc.cluster.local
+        
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        
+        prometheus :9153
+        
+        forward . /etc/resolv.conf {
+            max_concurrent 1000
+        }
+        
+        cache 30
+        loop
+        reload
+        loadbalance
+    }

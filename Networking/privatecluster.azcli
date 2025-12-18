@@ -1,0 +1,15 @@
+# Login no azure
+az login
+
+# Obter credenciais do AKS
+az aks get-credentials -g rg-aks-private -n aks-private
+
+# Obter Pods
+kubectl get pods
+
+# User comando invote
+az aks command invoke -g rg-aks-private -n aks-private --command "kubectl get all"
+
+# Invoke com Arquivos
+
+az aks command invoke -g rg-aks-private -n aks-private --command "kubectl apply -f https://raw.githubusercontent.com/viniciuspoa2/aks/main/Workloads/Deployment/deployment.yaml"

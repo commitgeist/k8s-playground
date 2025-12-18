@@ -1,0 +1,4 @@
+# Login no Azure
+az login
+# Verificar o uso do http Applicatiom Routing
+az aks show -n aks-http-ap-routing -g rg-aks-http-routing --query addonProfiles.httpApplicationRouting.HTTPApplicationRoutingZoneName

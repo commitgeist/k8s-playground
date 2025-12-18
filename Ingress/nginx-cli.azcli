@@ -1,0 +1,56 @@
+# Login no Azure
+az login
+
+# Parametros
+rg=aks-ingress-nginx
+local=eastus
+aks=aks-nginx
+sku=Standard_B2s
+ns=Ingress
+
+
+# Criar grupo de recursos
+az group create -n $rg -l $local
+
+# Criar AKS
+az aks create -g $rg -n $aks --node-count 1 --node-vm-size $sku
+
+# Obter Credenciais
+az aks get-credentials -g $rg -n $aks
+
+# Listar Nodes
+kubectl get nodes
+
+# Criar namespace para os recursos do Ingress
+ns=ingress
+kubectl create ns $ns
+
+# Adicionar repositório oficial do NGINX
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+# Atualizar repositório
+helm repo update
+
+
+#IP do Loadbalancer(kubectl get service -l app.kubernetes.io/name=ingress-nginx -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')
+ip=<IP>
+
+# Instalar o NGINX Ingress Controller
+helm install ingress-nginx ingress-nginx/ingress-nginx \ 
+    --namespace $ns \
+    --set controller.nodeSelector."kubernetes\.io/os"=linux \
+    --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux
+    --set defaultBackend.nodeSelector."kubernetes\.io/os"=linux
+    --set controller.service.externalTrafficPolicy=Local \
+    --set controller.service.loadBalancerIP="$ip"
+
+
+# Listar services no namespace do ingress
+kubectl get service -l app.kubernetes.io/name=ingress-nginx -n $ns
+
+
+# Listar Pods
+kubectl get pods -n $ns
+
+# Listar Serviços
+kubectl get svc -n $ns

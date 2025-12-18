@@ -1,0 +1,44 @@
+# Caso de Uso: Otimização de Cache
+# 
+# Cenário: Melhorar performance e reduzir latência de DNS
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-cache-optimized
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        ready
+        
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        
+        # Cache otimizado com prefetch
+        cache 300 {
+            success 30 3600
+            denial 30 600
+            prefetch 10 60s 20%
+            serve_stale 86400s
+        }
+        
+        prometheus :9153
+        
+        forward . 8.8.8.8 8.8.4.4 1.1.1.1 {
+            max_concurrent 1000
+            expire 10s
+            health_check 5s
+        }
+        
+        loop
+        reload
+        loadbalance
+    }

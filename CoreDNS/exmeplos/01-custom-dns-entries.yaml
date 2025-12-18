@@ -1,0 +1,62 @@
+# Caso de Uso: Adicionar Entradas DNS Customizadas
+# 
+# Cenário: Você precisa que seus pods resolvam domínios internos específicos
+# sem criar Services no Kubernetes.
+#
+# Exemplo: Servidor legado que não está no K8s mas precisa ser acessado
+# por nome (ex: legacy-db.company.local → 192.168.1.50)
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health {
+            lameduck 5s
+        }
+        ready
+        
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        
+        # Entradas DNS estáticas
+        hosts {
+            # Servidores legados
+            192.168.1.50 legacy-db.company.local
+            192.168.1.51 legacy-api.company.local
+            
+            # Serviços externos
+            10.0.0.100 external-service.local
+            
+            # Ambiente de desenvolvimento
+            192.168.100.10 dev-database.local
+            
+            fallthrough
+        }
+        
+        prometheus :9153
+        
+        forward . /etc/resolv.conf {
+            max_concurrent 1000
+        }
+        
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+
+---
+# Como aplicar:
+# kubectl apply -f 01-custom-dns-entries.yaml
+# kubectl rollout restart deployment coredns -n kube-system
+#
+# Como testar:
+# kubectl run test-dns --image=busybox --rm -it -- nslookup legacy-db.company.local
