@@ -139,3 +139,26 @@ nodes:
 ```bash
 kind create cluster --config createfile.yaml --name cloudmine
 ```
+
+---
+
+## Estrutura do Repositório
+
+### Workloads
+- [Workloads/](Workloads/) - Pods, Deployments, StatefulSets, DaemonSets, Services, Volumes, Probes
+
+### Networking
+- [Networking/](Networking/) - CNI, Kubenet, Azure CNI, Private Cluster
+- [Ingress/](Ingress/) - Ingress Controllers, HTTP Application Routing, NGINX
+- [CoreDNS/](CoreDNS/) - DNS no Kubernetes, configurações customizadas
+
+### Segurança e Acesso
+- [RBAC/](RBAC/) - Role-Based Access Control, Service Accounts, AAD Integration
+- [Cert-Manager/](Cert-Manager/) - Gerenciamento de certificados TLS
+
+### Ferramentas
+- [Helm/](Helm/) - Package manager para Kubernetes
+- [Troubleshooting/](Troubleshooting/) - Guias de debug e ferramentas (netshoot)
+
+### Outros
+- [Annotations/](Annotations/) - Anotações no Kubernetes

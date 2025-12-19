@@ -1,0 +1,39 @@
+# Pod netshoot básico para troubleshooting
+# 
+# Uso:
+# kubectl apply -f netshoot-pod.yaml
+# kubectl exec -it netshoot -- bash
+# kubectl delete -f netshoot-pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netshoot
+  namespace: default
+  labels:
+    app: netshoot
+    purpose: troubleshooting
+spec:
+  containers:
+  - name: netshoot
+    image: nicolaka/netshoot:latest
+    command: ["sleep", "infinity"]
+    
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: 500m
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    
+    securityContext:
+      # Adicionar capabilities para tcpdump
+      capabilities:
+        add:
+        - NET_ADMIN
+        - NET_RAW
+      runAsNonRoot: false
+  
+  restartPolicy: Always
+

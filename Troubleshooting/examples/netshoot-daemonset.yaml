@@ -1,0 +1,69 @@
+# DaemonSet netshoot - Um pod em cada node para troubleshooting
+# 
+# Uso:
+# kubectl apply -f netshoot-daemonset.yaml
+# kubectl get pods -l app=netshoot -o wide
+# kubectl exec -it <pod-name> -- bash
+# kubectl delete -f netshoot-daemonset.yaml
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: netshoot
+  namespace: default
+  labels:
+    app: netshoot
+spec:
+  selector:
+    matchLabels:
+      app: netshoot
+  
+  template:
+    metadata:
+      labels:
+        app: netshoot
+        purpose: troubleshooting
+    spec:
+      # Tolerar nodes com taints
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+      
+      # Host network para debug de rede do node
+      hostNetwork: true
+      hostPID: true
+      
+      containers:
+      - name: netshoot
+        image: nicolaka/netshoot:latest
+        command: ["sleep", "infinity"]
+        
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 500m
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+            - SYS_ADMIN
+        
+        volumeMounts:
+        - name: host-root
+          mountPath: /host
+          readOnly: true
+      
+      volumes:
+      - name: host-root
+        hostPath:
+          path: /
+          type: Directory
+

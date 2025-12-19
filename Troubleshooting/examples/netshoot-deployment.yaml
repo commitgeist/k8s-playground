@@ -1,0 +1,49 @@
+# Deployment netshoot para troubleshooting persistente
+# 
+# Uso:
+# kubectl apply -f netshoot-deployment.yaml
+# kubectl exec -it deployment/netshoot -- bash
+# kubectl delete -f netshoot-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netshoot
+  namespace: default
+  labels:
+    app: netshoot
+spec:
+  replicas: 1
+  
+  selector:
+    matchLabels:
+      app: netshoot
+  
+  template:
+    metadata:
+      labels:
+        app: netshoot
+        purpose: troubleshooting
+    spec:
+      containers:
+      - name: netshoot
+        image: nicolaka/netshoot:latest
+        command: ["sleep", "infinity"]
+        
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 500m
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+            - NET_RAW
+          runAsNonRoot: false
+      
+      restartPolicy: Always
+
