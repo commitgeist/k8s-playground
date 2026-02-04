@@ -1,0 +1,34 @@
+# Login no Azure
+az login
+
+# Obter Credentials do Cluster
+az aks get-credentials --resource-group rg-agic --name aks-agic
+
+# Criar Deployment Root
+kubectl apply -f Deployments/root.yaml
+
+# Criar Service Root
+kubectl apply -f Services/root.yaml
+
+# Criar Ingress Root
+kubectl apply -f Ingress/root.yaml
+
+# Service 1
+# Criar Deployment para Service 1
+kubectl apply -f Deployments/service1.yaml
+
+# Criar Service 1
+kubectl apply -f Services/service1.yaml
+
+# Criar Ingress para o Service 1
+kubectl apply -f Ingress/service1.yaml
+
+# Service 2
+# Criar Deployment para Service 2
+kubectl apply -f Deployments/service2.yaml
+
+# Criar Service 2
+kubectl apply -f Services/service2.yaml
+
+# Criar Ingress para Service 2
+kubectl apply -f Ingress/service2.yaml

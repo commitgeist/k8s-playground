@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-root
+spec:
+  selector:
+    matchLabels:
+      app: service-root
+  template:
+    metadata:
+      labels:
+        app: service-root
+    spec:
+      containers:
+      - name: service-root
+        image: "mcr.microsoft.com/dotnet/core/samples:aspnetapp"
+        ports:
+        - containerPort: 80

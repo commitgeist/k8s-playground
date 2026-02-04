@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service2
+spec:
+  selector:
+    matchLabels:
+      app: service2
+  template:
+    metadata:
+      labels:
+        app: service2
+    spec:
+      containers:
+      - name: service2
+        image: iamnoah4real/saywhat
+        env:
+          - name: RESPONSE_MESSAGE
+            value: "Service 2 esta no ar!"
+        ports:
+        - containerPort: 3000
