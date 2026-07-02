@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: python-app-ingress-traefik
+  # No need for controller-specific annotations unless required for advanced features
+spec:
+  # ✅ Change the ingress class to 'traefik'
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - python.rancher.devopsforlife.io 
+    secretName: python-tls-secret
+  rules:
+  - host: python.rancher.devopsforlife.io 
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: simple-python-app-service
+            port:
+              number: 80

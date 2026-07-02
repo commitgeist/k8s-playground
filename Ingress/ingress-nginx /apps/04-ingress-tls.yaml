@@ -1,0 +1,25 @@
+# Ingress com TLS – usa o secret tls-kubenerd gerado no README
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-hello-tls
+  namespace: lab-apps
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - secure.kubenerd.local
+      secretName: tls-kubenerd
+  rules:
+    - host: secure.kubenerd.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-hello
+                port:
+                  number: 80

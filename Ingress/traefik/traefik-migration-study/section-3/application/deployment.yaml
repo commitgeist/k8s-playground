@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-python-app
+  namespace: default  # Change if using a custom namespace
+  labels:
+    app: simple-python-app
+spec:
+  replicas: 2  # Scale as needed
+  selector:
+    matchLabels:
+      app: simple-python-app
+  template:
+    metadata:
+      labels:
+        app: simple-python-app
+    spec:
+      containers:
+      - name: app
+        image: jonathanbaraldi/simple-python-app:latest  # This will be updated in the workflow
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---

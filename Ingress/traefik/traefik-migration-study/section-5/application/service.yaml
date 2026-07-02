@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-python-app-service
+  namespace: default  # Match the deployment namespace
+spec:
+  type: ClusterIP  # Use NodePort if you prefer manual port forwarding; LoadBalancer works if your Rancher/EC2 setup has a cloud load balancer
+  ports:
+  - port: 80
+    targetPort: 5000
+    protocol: TCP
+  selector:
+    app: simple-python-app

@@ -1,0 +1,21 @@
+# Estado inicial: Ingress servido pelo NGINX
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-nginx
+  namespace: migration-lab
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: app.kubenerd.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 80

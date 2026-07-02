@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: simple-python-app-route
+spec:
+  entryPoints:
+    # Traefik default entry points
+    - web
+    - websecure 
+  routes:
+  - match: Host(`python.rancher.devopsforlife.io`)
+    kind: Rule
+    services:
+    - name: simple-python-app-service # This is your existing Service name
+      port: 80 # This is the Service port
+  # Configure TLS for the application
+  tls:
+    secretName: python-tls-secret

@@ -1,0 +1,39 @@
+# Ingress nativo do Kubernetes apontando pro Traefik
+# Mesma sintaxe que voce usaria com nginx — basta trocar o ingressClassName
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami
+  namespace: lab-apps
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: whoami.kubenerd.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-hello
+  namespace: lab-apps
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hello.kubenerd.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-hello
+                port:
+                  number: 80

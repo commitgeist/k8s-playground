@@ -1,0 +1,58 @@
+# Helm values pro Traefik no kind
+# Service NodePort fixo nas portas que o kind mapeia pro host (80/443/9000)
+deployment:
+  kind: Deployment
+  replicas: 2
+
+service:
+  type: NodePort
+
+ports:
+  web:
+    port: 8000          # porta dentro do container (non-root nao binda < 1024)
+    exposedPort: 80     # porta do Service
+    nodePort: 30080
+  websecure:
+    port: 8443
+    exposedPort: 443
+    nodePort: 30443
+  traefik:
+    expose:
+      default: true
+    port: 9000
+    nodePort: 30900
+
+api:
+  dashboard: true
+  insecure: false
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: Host(`traefik.kubenerd.local`)
+    entryPoints: ["web"]   # HTTP only no lab local
+
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowCrossNamespace: true
+  kubernetesIngress:
+    enabled: true
+    publishedService:
+      enabled: true
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true
+
+# IngressClass que o controller vai "watcher"
+# Permite usar `ingressClassName: traefik` em Ingress nativo
+ingressClass:
+  enabled: true
+  isDefaultClass: false
+  name: traefik
+
+# Lab local sem TLS / sem auth no dashboard.
+# Pra producao: re-habilitar basicAuth + TLS no IngressRoute acima.

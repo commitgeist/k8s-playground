@@ -1,0 +1,21 @@
+# Coexistencia: mesmo host, mesmo backend, controller diferente
+# Os dois Ingress podem existir simultaneamente — cada controller só pega
+# os Ingress cujo ingressClassName bate com sua IngressClass.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-traefik
+  namespace: migration-lab
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: app.kubenerd.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app
+                port:
+                  number: 80

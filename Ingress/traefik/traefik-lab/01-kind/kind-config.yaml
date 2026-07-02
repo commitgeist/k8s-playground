@@ -1,0 +1,23 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: traefik-lab
+# IMPORTANTE: imagem >= 1.31. O chart do Traefik traz CRDs do Gateway API
+# que usam a funcao CEL isIP(), disponivel apenas a partir do K8s 1.31.
+# Em 1.30 o `helm install` falha com "undeclared reference to 'isIP'".
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.31.0
+    extraPortMappings:
+      - containerPort: 30080   # traefik web   (NodePort)
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 30443   # traefik websecure (NodePort)
+        hostPort: 443
+        protocol: TCP
+      - containerPort: 30900   # traefik dashboard (opcional via NodePort)
+        hostPort: 9000
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.31.0
+  - role: worker
+    image: kindest/node:v1.31.0

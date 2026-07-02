@@ -1,0 +1,44 @@
+# Ingress simples – host-based routing
+# Acesse via: curl -H "Host: hello.kubenerd.local" http://localhost
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-hello
+  namespace: lab-apps
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: hello.kubenerd.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-hello
+                port:
+                  number: 80
+---
+# Ingress com path-based routing + rewrite
+# /senhas/* -> giropops-senhas (rewrite para /)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: giropops-senhas
+  namespace: lab-apps
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: app.kubenerd.local
+      http:
+        paths:
+          - path: /senhas(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: giropops-senhas
+                port:
+                  number: 5000
